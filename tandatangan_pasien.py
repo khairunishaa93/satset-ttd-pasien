@@ -22,12 +22,12 @@ Silakan minta pasien untuk:
 # Kanvas untuk tanda tangan
 canvas_result = st_canvas(
     fill_color="rgba(255, 255, 255, 0)",
-    stroke_width=2,
+    stroke_width=4,
     stroke_color="#000000",
     background_color="#ffffff",
     update_streamlit=True,
-    height=250,
-    width=600,
+    height=80,
+    width=200,
     drawing_mode="freedraw",
     key="canvas",
 )
