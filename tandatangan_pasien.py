@@ -21,8 +21,7 @@ Silakan minta pasien untuk:
 
 # Kanvas untuk tanda tangan
 canvas_result = st_canvas(
-    fill_color="rgba(0, 0, 0, 0)", #
-    background transparan
+    fill_color="rgba(0, 0, 0, 0)",
     stroke_width=3,
     stroke_color="#000000",
     background_color="None",
