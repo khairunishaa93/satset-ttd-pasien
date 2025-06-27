@@ -5,7 +5,6 @@ from io import BytesIO
 import base64
 import re
 
-# Judul Aplikasi
 st.set_page_config(page_title="Formulir Tanda Tangan Digital Pasien", layout="centered")
 st.title("📝 Formulir Tanda Tangan Digital Pasien")
 
@@ -41,16 +40,16 @@ if st.button("📥 Simpan Tanda Tangan"):
     else:
         # Bersihkan nama pasien dari karakter tidak valid untuk nama file
         nama_file = re.sub(r'[\\/*?:"<>|]', "_", nama_pasien.strip()) + ".png"
-        
+
         # Buat gambar dari canvas
         img = Image.fromarray((canvas_result.image_data).astype("uint8"))
 
-        # Simpan ke buffer
+        # Simpan ke buffer untuk unduhan
         buffered = BytesIO()
         img.save(buffered, format="PNG")
         img_bytes = buffered.getvalue()
 
-        # Encode untuk download link
+        # Encode base64
         b64 = base64.b64encode(img_bytes).decode()
         href = f'<a href="data:file/png;base64,{b64}" download="{nama_file}">Klik di sini untuk mengunduh tanda tangan 🖼️</a>'
         st.success(f"Tanda tangan '{nama_pasien}' berhasil disimpan.")
