@@ -1,30 +1,25 @@
 import streamlit as st
 from streamlit_drawable_canvas import st_canvas
 from PIL import Image
-from io import BytesIO
-import base64
-import re
+import io
 
-# Judul Aplikasi
-st.set_page_config(page_title="Formulir Tanda Tangan Digital Pasien", layout="centered")
-st.title("📝 Formulir Tanda Tangan Digital Pasien")
+st.set_page_config(page_title="Tanda Tangan Pasien", layout="centered")
+st.title("🖊️ Formulir Tanda Tangan Digital Pasien")
 
-# Input Nama Pasien
-nama_pasien = st.text_input("👤 Nama Lengkap Pasien")
+# Input nama pasien
+nama_pasien = st.text_input("Nama Pasien")
 
-# Instruksi
 st.markdown("""
-Silakan minta pasien untuk:
-1. Mengetik nama lengkap terlebih dahulu.
-2. Tanda tangan di bawah ini menggunakan jari (layar sentuh).
+Silakan tanda tangan di bawah ini sebagai bukti telah menerima obat.
+Gunakan jari atau stylus untuk menggambar pada kotak di bawah.
 """)
 
-# Kanvas untuk tanda tangan
+# Set canvas ukuran sedang dengan background putih untuk kenyamanan pasien
 canvas_result = st_canvas(
-    fill_color="rgba(0, 0, 0, 0)",
-    stroke_width=3,
+    fill_color="rgba(255, 255, 255, 1)",  # background putih
+    stroke_width=2,
     stroke_color="#000000",
-    background_color="None",
+    background_color="#ffffff",
     update_streamlit=True,
     height=200,
     width=500,
@@ -32,26 +27,32 @@ canvas_result = st_canvas(
     key="canvas",
 )
 
-# Tombol Simpan
-if st.button("📥 Simpan Tanda Tangan"):
-    if not nama_pasien:
-        st.warning("Harap isi nama pasien terlebih dahulu.")
-    elif canvas_result.image_data is None:
-        st.warning("Tanda tangan belum dibuat.")
-    else:
-        # Bersihkan nama pasien dari karakter tidak valid untuk nama file
-        nama_file = re.sub(r'[\\/*?:"<>|]', "_", nama_pasien.strip()) + ".png"
-        
-        # Buat gambar dari canvas
-        img = Image.fromarray((canvas_result.image_data).astype("uint8"))
-
+# Tombol simpan
+if st.button("💾 Simpan Tanda Tangan"):
+    if canvas_result.image_data is not None and nama_pasien:
         # Simpan ke buffer
-        buffered = BytesIO()
-        img.save(buffered, format="PNG")
-        img_bytes = buffered.getvalue()
+        img = Image.fromarray(canvas_result.image_data.astype('uint8')).convert("RGBA")
+        datas = img.getdata()
+        newData = []
 
-        # Encode untuk download link
-        b64 = base64.b64encode(img_bytes).decode()
-        href = f'<a href="data:file/png;base64,{b64}" download="{nama_file}">Klik di sini untuk mengunduh tanda tangan 🖼️</a>'
-        st.success(f"Tanda tangan '{nama_pasien}' berhasil disimpan.")
-        st.markdown(href, unsafe_allow_html=True)
+        for item in datas:
+            # Ubah putih menjadi transparan
+            if item[:3] == (255, 255, 255):
+                newData.append((255, 255, 255, 0))
+            else:
+                newData.append(item)
+
+        img.putdata(newData)
+
+        buffer = io.BytesIO()
+        filename = f"ttd_{nama_pasien.replace(' ', '_')}.png"
+        img.save(buffer, format="PNG")
+        st.success("Tanda tangan berhasil disimpan!")
+        st.download_button("⬇️ Download Tanda Tangan", buffer.getvalue(), file_name=filename, mime="image/png")
+    else:
+        st.warning("Harap isi nama pasien dan lakukan tanda tangan terlebih dahulu.")
+
+st.markdown("""
+---
+© SatSet Obat Klaim – RSUD Srengat
+""")
